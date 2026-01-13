@@ -63,7 +63,7 @@ function MasonryClient({ items }) {
               </div>
             )}
             <div className="feed-meta">
-              <a href={it.link} target="_blank" rel="noreferrer">Откруть в Social</a>
+              <a href={it.link} target="_blank" rel="noreferrer">Открыть в Social</a>
               {it.pubDate ? ` • ${new Date(it.pubDate).toLocaleString()}` : ""}
             </div>
           </article>
