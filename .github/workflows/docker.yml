@@ -17,6 +17,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set lowercase owner
+        run: |
+          echo "OWNER_LOWER=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -27,7 +31,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.repository_owner }}
+          username: ${{ env.OWNER_LOWER }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push (latest)
@@ -35,6 +39,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/luminor-web:latest
+          tags: ghcr.io/${{ env.OWNER_LOWER }}/luminor-web:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
