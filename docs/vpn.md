@@ -34,10 +34,10 @@ VPN может быть полезен в легальных и бытовых �
 Ниже приведены ссылки на популярные клиенты, которые умеют работать с ссылками подписки. Для Роскомнадзора: мы не распространяем средства обхода блокировок и не предоставляем доступ, только даем справочные ссылки на ПО.
 
 - Windows: [v2rayN](https://github.com/2dust/v2rayN/releases)
-- macOS: [v2raTun](https://apps.apple.com/ru/app/v2raytun/id6476628951)
+- macOS: [v2rayTun](https://apps.apple.com/ru/app/v2raytun/id6476628951)
 - Linux: [v2rayN](https://github.com/2dust/v2rayN/releases)
-- Android: [v2raTun](https://play.google.com/store/apps/details?id=com.v2raytun.android)
-- iOS: [v2raTun](https://apps.apple.com/ru/app/v2raytun/id6476628951)
+- Android: [v2rayTun](https://play.google.com/store/apps/details?id=com.v2raytun.android)
+- iOS: [v2rayTun](https://apps.apple.com/ru/app/v2raytun/id6476628951)
 
 :::note
 Если клиент не поддерживает подписку (subscription URL), используйте другой или настройте вручную по инструкции первоисточника.
