@@ -50,7 +50,7 @@ const config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/Luminor-Games/luminor-web/edit/main/',
+            'https://github.com/Luminor-Games/Website/edit/main/',
         },
         theme: {
           customCss: './src/css/custom.css',
