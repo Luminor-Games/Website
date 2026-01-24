@@ -84,3 +84,4 @@ Java `1.21.11`: `alt.luminor.games` или `5.83.140.203:25794`
 
 Bedrock `ПЕ 1.21`: `alt.luminor.games:25655` или `5.83.140.203:25655`
 
+![Luminor Cover](./imgs/luminor-cover.png)
