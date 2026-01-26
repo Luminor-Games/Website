@@ -1,0 +1,15 @@
+services:
+  luminor-web:
+    image: ghcr.io/luminor-games/luminor-web:latest
+    container_name: luminor-web
+    restart: unless-stopped
+    env_file:
+      - .env
+    expose:
+      - "3000"
+    networks:
+      - nginx_network
+
+networks:
+  nginx_network:
+    external: true

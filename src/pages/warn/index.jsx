@@ -1,5 +1,11 @@
 import React from "react";
 import Layout from "@theme/Layout";
+import {
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { useHistory } from "@docusaurus/router";
 
 const TYPE_OPTIONS = [
   { value: "", label: "Все" },
@@ -62,6 +68,7 @@ function relativeFromNow(input) {
 }
 
 export default function WarnPage() {
+  const history = useHistory();
   const [data, setData] = React.useState(null);
   const [error, setError] = React.useState("");
   const [loading, setLoading] = React.useState(false);
@@ -151,27 +158,171 @@ export default function WarnPage() {
     }));
   }
 
-  function applySort(nextSort) {
-    setFilters((prev) => {
-      const isSame = prev.sort === nextSort;
-      const nextOrder = isSame && prev.order === "desc" ? "asc" : "desc";
-      return { ...prev, sort: nextSort, order: nextOrder, page: 1 };
-    });
-  }
+  const sortingState = React.useMemo(
+    () => [{ id: filters.sort, desc: filters.order === "desc" }],
+    [filters.order, filters.sort]
+  );
 
-  function sortIndicator(key) {
-    if (filters.sort !== key) return "↕";
-    return filters.order === "asc" ? "↑" : "↓";
-  }
+  const columns = React.useMemo(
+    () => [
+      {
+        id: "type",
+        header: "Тип",
+        cell: ({ row }) => (
+          <span className={`warn-badge warn-badge--${row.original.type}`}>
+            {TYPE_LABELS[row.original.type] ?? row.original.type}
+          </span>
+        ),
+      },
+      {
+        id: "player",
+        header: ({ column }) => (
+          <button
+            type="button"
+            className="warn-sort"
+            onClick={column.getToggleSortingHandler()}
+          >
+            {SORT_LABELS.player}
+            <span>
+              {column.getIsSorted() === "asc"
+                ? "↑"
+                : column.getIsSorted() === "desc"
+                ? "↓"
+                : "↕"}
+            </span>
+          </button>
+        ),
+        accessorKey: "player",
+        enableSorting: true,
+        cell: ({ row }) => (
+          <span className="warn-person">
+            <img
+              src={`https://avatar.luminor.games/face/name/${encodeURIComponent(
+                row.original.player || "lakiviko"
+              )}?upscale=4`}
+              alt=""
+              loading="lazy"
+            />
+            <span className="warn-person__name">{row.original.player || "—"}</span>
+          </span>
+        ),
+      },
+      {
+        id: "staff",
+        header: ({ column }) => (
+          <button
+            type="button"
+            className="warn-sort"
+            onClick={column.getToggleSortingHandler()}
+          >
+            {SORT_LABELS.staff}
+            <span>
+              {column.getIsSorted() === "asc"
+                ? "↑"
+                : column.getIsSorted() === "desc"
+                ? "↓"
+                : "↕"}
+            </span>
+          </button>
+        ),
+        accessorKey: "staff",
+        enableSorting: true,
+        cell: ({ row }) => (
+          <span className="warn-person">
+            <img
+              src={`https://avatar.luminor.games/face/name/${encodeURIComponent(
+                row.original.staff || "lakiviko"
+              )}?upscale=4`}
+              alt=""
+              loading="lazy"
+            />
+            <span className="warn-person__name">{row.original.staff || "—"}</span>
+          </span>
+        ),
+      },
+      {
+        id: "reason",
+        header: "Причина",
+        cell: ({ row }) => row.original.reason || "—",
+      },
+      {
+        id: "date",
+        accessorFn: (row) => row.time,
+        header: ({ column }) => (
+          <button
+            type="button"
+            className="warn-sort"
+            onClick={column.getToggleSortingHandler()}
+          >
+            {SORT_LABELS.date}
+            <span>
+              {column.getIsSorted() === "asc"
+                ? "↑"
+                : column.getIsSorted() === "desc"
+                ? "↓"
+                : "↕"}
+            </span>
+          </button>
+        ),
+        enableSorting: true,
+        cell: ({ row }) => (
+          <span title={relativeFromNow(row.original.time)}>
+            {formatDate(row.original.time)}
+          </span>
+        ),
+      },
+      {
+        id: "until",
+        header: "Истекает",
+        cell: ({ row }) => {
+          const untilValue = Number(row.original.until);
+          const isTimed = Number.isFinite(untilValue) && untilValue > 0;
+          const isPermanent =
+            !isTimed && ["ban", "mute"].includes(row.original.type);
+          const label = isTimed
+            ? formatDate(untilValue)
+            : isPermanent
+            ? "Пожизненное наказание"
+            : "N/A";
+          const dotClass = isTimed ? "warn-dot--timed" : isPermanent ? "warn-dot--perm" : "";
+          const title = isTimed ? relativeFromNow(untilValue) : "";
+
+          return (
+            <span className="warn-until" title={title}>
+              {dotClass ? <span className={`warn-dot ${dotClass}`} /> : null}
+              <span>{label}</span>
+            </span>
+          );
+        },
+      },
+    ],
+    []
+  );
+
+  const table = useReactTable({
+    data: data?.items ?? [],
+    columns,
+    state: { sorting: sortingState },
+    enableSortingRemoval: false,
+    manualSorting: true,
+    getCoreRowModel: getCoreRowModel(),
+    onSortingChange: (updater) => {
+      const next =
+        typeof updater === "function" ? updater(sortingState) : updater;
+      const nextSort = next?.[0];
+      if (!nextSort?.id) return;
+      setFilters((prev) => ({
+        ...prev,
+        sort: nextSort.id,
+        order: nextSort.desc ? "desc" : "asc",
+        page: 1,
+      }));
+    },
+  });
 
   return (
     <Layout title="Стена позора">
       <main className="container margin-vert--lg warn-container">
-        <section className="warn-hero">
-          <h1>Стена позора Luminor</h1>
-          <p className="warn-subtitle">Правосудие настигнет каждого!</p>
-        </section>
-
         <section className="warn-cards">
           <button
             type="button"
@@ -237,85 +388,51 @@ export default function WarnPage() {
           <div className="warn-table-wrap">
             <table className="warn-table">
               <thead>
-                <tr>
-                  <th className="warn-col-type">Тип</th>
-                  <th className="warn-col-player">
-                    <button
-                      type="button"
-                      className="warn-sort"
-                      onClick={() => applySort("player")}
-                    >
-                      {SORT_LABELS.player}
-                      <span>{sortIndicator("player")}</span>
-                    </button>
-                  </th>
-                  <th className="warn-col-staff">
-                    <button
-                      type="button"
-                      className="warn-sort"
-                      onClick={() => applySort("staff")}
-                    >
-                      {SORT_LABELS.staff}
-                      <span>{sortIndicator("staff")}</span>
-                    </button>
-                  </th>
-                  <th className="warn-col-reason">Причина</th>
-                  <th className="warn-col-date">
-                    <button
-                      type="button"
-                      className="warn-sort"
-                      onClick={() => applySort("date")}
-                    >
-                      {SORT_LABELS.date}
-                      <span>{sortIndicator("date")}</span>
-                    </button>
-                  </th>
-                  <th className="warn-col-until">Истекает</th>
-                </tr>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        className={`warn-col-${header.column.id}`}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
               </thead>
               <tbody>
-                {(data?.items ?? []).map((item) => {
-                  const untilText =
-                    Number(item.until) > 0 ? formatDate(item.until) : "N/A";
-                  return (
-                    <tr key={`${item.type}-${item.time}-${item.player}-${item.staff}`}>
-                      <td className="warn-col-type">
-                        <span className={`warn-badge warn-badge--${item.type}`}>
-                          {TYPE_LABELS[item.type] ?? item.type}
-                        </span>
+                {table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="warn-row"
+                    role="link"
+                    tabIndex={0}
+                    onClick={() =>
+                      history.push(`/warn/${row.original.type}/${row.original.id}`)
+                    }
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        history.push(`/warn/${row.original.type}/${row.original.id}`);
+                      }
+                    }}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td
+                        key={cell.id}
+                        className={`warn-col-${cell.column.id}`}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>
-                      <td className="warn-col-player">
-                        <span className="warn-player">
-                          <img
-                            src={`https://avatar.luminor.games/face/name/${encodeURIComponent(
-                              item.player || "lakiviko"
-                            )}?upscale=4`}
-                            alt=""
-                            loading="lazy"
-                          />
-                          <span>{item.player || "—"}</span>
-                        </span>
-                      </td>
-                      <td className="warn-col-staff">
-                        <span className="warn-player">
-                          <img
-                            src={`https://avatar.luminor.games/face/name/${encodeURIComponent(
-                              item.staff || "lakiviko"
-                            )}?upscale=4`}
-                            alt=""
-                            loading="lazy"
-                          />
-                          <span>{item.staff || "—"}</span>
-                        </span>
-                      </td>
-                      <td className="warn-col-reason">{item.reason || "—"}</td>
-                      <td className="warn-col-date" title={relativeFromNow(item.time)}>
-                        {formatDate(item.time)}
-                      </td>
-                      <td className="warn-col-until">{untilText}</td>
-                    </tr>
-                  );
-                })}
+                    ))}
+                  </tr>
+                ))}
                 {!loading && data && data.items?.length === 0 && (
                   <tr>
                     <td colSpan="6" style={{ textAlign: "center" }}>

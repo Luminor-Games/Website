@@ -168,13 +168,16 @@ app.get("/api/warn", async (req, reply) => {
     const unionParts = selectedTypes.map(
       (t) =>
         `SELECT '${t}' AS type,
+          p.id AS id,
           COALESCE(h.name, p.uuid) AS player,
           p.uuid AS player_uuid,
           h.name AS player_name,
           p.banned_by_name AS staff,
           p.reason,
           p.time,
-          p.until
+          p.until,
+          p.server_scope,
+          p.server_origin
         FROM ${PUNISHMENT_TABLES[t]} p
         ${historyJoin}`
     );
@@ -248,6 +251,58 @@ app.get("/api/warn", async (req, reply) => {
   }
 });
 
+app.get("/api/warn/:type/:id", async (req, reply) => {
+  try {
+    const { type, id } = req.params ?? {};
+    const safeType = typeof type === "string" ? type.toLowerCase() : "";
+    const table = PUNISHMENT_TABLES[safeType];
+    if (!table) return reply.code(404).send({ error: "Unknown punishment type" });
+
+    const historyJoin = `
+      LEFT JOIN (
+        SELECT h.uuid, h.name
+        FROM litebans_history h
+        JOIN (
+          SELECT uuid, MAX(date) AS max_date
+          FROM litebans_history
+          GROUP BY uuid
+        ) last
+        ON h.uuid = last.uuid AND h.date = last.max_date
+      ) h
+      ON h.uuid = p.uuid
+    `;
+
+    const db = getPool();
+    const [rows] = await db.query(
+      `SELECT '${safeType}' AS type,
+        p.id AS id,
+        COALESCE(h.name, p.uuid) AS player,
+        p.uuid AS player_uuid,
+        h.name AS player_name,
+        p.banned_by_name AS staff,
+        p.banned_by_uuid AS staff_uuid,
+        p.reason,
+        p.time,
+        p.until,
+        p.server_scope,
+        p.server_origin
+      FROM ${table} p
+      ${historyJoin}
+      WHERE p.id = ?
+      LIMIT 1`,
+      [id]
+    );
+
+    if (!rows?.length) {
+      return reply.code(404).send({ error: "Punishment not found" });
+    }
+
+    return rows[0];
+  } catch (e) {
+    reply.code(500).send({ error: String(e) });
+  }
+});
+
 // Статика: build/
 const siteDir = path.join(process.cwd(), "build");
 app.register(fastifyStatic, { root: siteDir, prefix: "/" });
@@ -260,5 +315,10 @@ app.setNotFoundHandler((req, reply) => {
   }
   reply.sendFile("index.html");
 });
+
+if (!DATABASE_URL) {
+  app.log.error("DATABASE_URL is not set. Refusing to start.");
+  process.exit(1);
+}
 
 app.listen({ host: "0.0.0.0", port: PORT });
