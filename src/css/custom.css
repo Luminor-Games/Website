@@ -430,6 +430,7 @@
   min-width: 100%;
   border-collapse: collapse;
   font-size: 0.95rem;
+  table-layout: fixed;
 }
 
 .warn-table th,
@@ -443,6 +444,30 @@
   font-weight: 600;
   color: var(--ifm-color-emphasis-700);
   background: rgba(0, 0, 0, 0.02);
+}
+
+.warn-col-type {
+  width: 92px;
+}
+
+.warn-col-player {
+  width: 170px;
+}
+
+.warn-col-staff {
+  width: 180px;
+}
+
+.warn-col-date {
+  width: 170px;
+}
+
+.warn-col-until {
+  width: 170px;
+}
+
+.warn-col-reason {
+  width: auto;
 }
 
 .warn-sort {
@@ -503,7 +528,7 @@
 }
 
 .warn-player img {
-  width: 36px;
+  width: 28px;
   height: 28px;
   border-radius: 8px;
   display: block;

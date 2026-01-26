@@ -39,6 +39,28 @@ function formatDate(input) {
   return new Date(ms).toLocaleString("ru-RU");
 }
 
+function relativeFromNow(input) {
+  const num = Number(input);
+  if (!Number.isFinite(num)) return "";
+  const ms = num < 1e12 ? num * 1000 : num;
+  const diffMs = ms - Date.now();
+  const isFuture = diffMs > 0;
+  const totalHours = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60));
+  const days = Math.floor(totalHours / 24);
+  const hours = totalHours % 24;
+
+  let body = "";
+  if (days > 0) {
+    body = `${days} дн ${hours} ч`;
+  } else if (hours > 0) {
+    body = `${hours} ч`;
+  } else {
+    body = "менее часа";
+  }
+
+  return isFuture ? `через ${body}` : `${body} назад`;
+}
+
 export default function WarnPage() {
   const [data, setData] = React.useState(null);
   const [error, setError] = React.useState("");
@@ -216,8 +238,8 @@ export default function WarnPage() {
             <table className="warn-table">
               <thead>
                 <tr>
-                  <th>Тип</th>
-                  <th>
+                  <th className="warn-col-type">Тип</th>
+                  <th className="warn-col-player">
                     <button
                       type="button"
                       className="warn-sort"
@@ -227,7 +249,7 @@ export default function WarnPage() {
                       <span>{sortIndicator("player")}</span>
                     </button>
                   </th>
-                  <th>
+                  <th className="warn-col-staff">
                     <button
                       type="button"
                       className="warn-sort"
@@ -237,8 +259,8 @@ export default function WarnPage() {
                       <span>{sortIndicator("staff")}</span>
                     </button>
                   </th>
-                  <th>Причина</th>
-                  <th>
+                  <th className="warn-col-reason">Причина</th>
+                  <th className="warn-col-date">
                     <button
                       type="button"
                       className="warn-sort"
@@ -248,7 +270,7 @@ export default function WarnPage() {
                       <span>{sortIndicator("date")}</span>
                     </button>
                   </th>
-                  <th>Истекает</th>
+                  <th className="warn-col-until">Истекает</th>
                 </tr>
               </thead>
               <tbody>
@@ -257,12 +279,12 @@ export default function WarnPage() {
                     Number(item.until) > 0 ? formatDate(item.until) : "N/A";
                   return (
                     <tr key={`${item.type}-${item.time}-${item.player}-${item.staff}`}>
-                      <td>
+                      <td className="warn-col-type">
                         <span className={`warn-badge warn-badge--${item.type}`}>
                           {TYPE_LABELS[item.type] ?? item.type}
                         </span>
                       </td>
-                      <td>
+                      <td className="warn-col-player">
                         <span className="warn-player">
                           <img
                             src={`https://avatar.luminor.games/face/name/${encodeURIComponent(
@@ -274,10 +296,23 @@ export default function WarnPage() {
                           <span>{item.player || "—"}</span>
                         </span>
                       </td>
-                      <td>{item.staff || "—"}</td>
-                      <td>{item.reason || "—"}</td>
-                      <td>{formatDate(item.time)}</td>
-                      <td>{untilText}</td>
+                      <td className="warn-col-staff">
+                        <span className="warn-player">
+                          <img
+                            src={`https://avatar.luminor.games/face/name/${encodeURIComponent(
+                              item.staff || "lakiviko"
+                            )}?upscale=4`}
+                            alt=""
+                            loading="lazy"
+                          />
+                          <span>{item.staff || "—"}</span>
+                        </span>
+                      </td>
+                      <td className="warn-col-reason">{item.reason || "—"}</td>
+                      <td className="warn-col-date" title={relativeFromNow(item.time)}>
+                        {formatDate(item.time)}
+                      </td>
+                      <td className="warn-col-until">{untilText}</td>
                     </tr>
                   );
                 })}
