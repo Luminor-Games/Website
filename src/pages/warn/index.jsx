@@ -383,7 +383,7 @@ export default function WarnPage() {
           </div>
 
           {error && <div className="warn-error">{error}</div>}
-          {loading && <div className="warn-loading">Загрузка…</div>}
+          {loading && !data && <div className="warn-loading">Загрузка…</div>}
 
           <div className="warn-table-wrap">
             <table className="warn-table">

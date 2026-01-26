@@ -1,6 +1,6 @@
 import React from "react";
 import Layout from "@theme/Layout";
-import { useParams } from "@docusaurus/router";
+import { matchPath, useLocation } from "@docusaurus/router";
 
 export const path = "/warn/:type/:id";
 
@@ -45,12 +45,24 @@ function resolveServer(item) {
 }
 
 export default function WarnDetail() {
-  const { type, id } = useParams();
+  const location = useLocation();
+  const match = matchPath(location.pathname, {
+    path: "/warn/:type/:id",
+    exact: true,
+  });
+  const type = match?.params?.type || "";
+  const id = match?.params?.id || "";
   const [data, setData] = React.useState(null);
   const [error, setError] = React.useState("");
   const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
+    if (!type || !id) {
+      setError("Страница наказания не найдена.");
+      setData(null);
+      return;
+    }
+
     let alive = true;
     setLoading(true);
     setError("");
