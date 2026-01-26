@@ -151,17 +151,40 @@ app.get("/api/warn", async (req, reply) => {
       return reply.code(400).send({ error: "Unknown punishment type" });
     }
 
+    const historyJoin = `
+      LEFT JOIN (
+        SELECT h.uuid, h.name
+        FROM litebans_history h
+        JOIN (
+          SELECT uuid, MAX(date) AS max_date
+          FROM litebans_history
+          GROUP BY uuid
+        ) last
+        ON h.uuid = last.uuid AND h.date = last.max_date
+      ) h
+      ON h.uuid = p.uuid
+    `;
+
     const unionParts = selectedTypes.map(
       (t) =>
-        `SELECT '${t}' AS type, uuid AS player, banned_by_name AS staff, reason, time, until FROM ${PUNISHMENT_TABLES[t]}`
+        `SELECT '${t}' AS type,
+          COALESCE(h.name, p.uuid) AS player,
+          p.uuid AS player_uuid,
+          h.name AS player_name,
+          p.banned_by_name AS staff,
+          p.reason,
+          p.time,
+          p.until
+        FROM ${PUNISHMENT_TABLES[t]} p
+        ${historyJoin}`
     );
 
     const filters = [];
     const params = [];
 
     if (typeof player === "string" && player.trim()) {
-      filters.push("t.player LIKE ?");
-      params.push(`%${player.trim()}%`);
+      filters.push("(t.player LIKE ? OR t.player_uuid LIKE ?)");
+      params.push(`%${player.trim()}%`, `%${player.trim()}%`);
     }
     if (typeof staff === "string" && staff.trim()) {
       filters.push("t.staff LIKE ?");
@@ -169,8 +192,10 @@ app.get("/api/warn", async (req, reply) => {
     }
     if (typeof search === "string" && search.trim()) {
       const q = `%${search.trim()}%`;
-      filters.push("(t.player LIKE ? OR t.staff LIKE ? OR t.reason LIKE ?)");
-      params.push(q, q, q);
+      filters.push(
+        "(t.player LIKE ? OR t.player_uuid LIKE ? OR t.staff LIKE ? OR t.reason LIKE ?)"
+      );
+      params.push(q, q, q, q);
     }
 
     const whereSql = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
