@@ -440,7 +440,7 @@
 
 .warn-table th,
 .warn-table td {
-  padding: 18px 20px;
+  padding: 12px 14px;
   border-bottom: 1px solid var(--ifm-color-emphasis-200);
   border-left: none;
   border-right: none;
@@ -500,6 +500,12 @@
   cursor: pointer;
 }
 
+.warn-col-player .warn-sort,
+.warn-col-staff .warn-sort {
+  justify-content: center;
+  width: 100%;
+}
+
 .warn-sort span {
   font-size: 0.85em;
   opacity: 0.6;
@@ -556,9 +562,9 @@
 }
 
 .warn-person img {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   display: block;
   object-fit: cover;
   background: rgba(0, 0, 0, 0.04);

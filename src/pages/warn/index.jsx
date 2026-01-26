@@ -387,6 +387,14 @@ export default function WarnPage() {
 
           <div className="warn-table-wrap">
             <table className="warn-table">
+              <colgroup>
+                <col className="warn-col-type" />
+                <col className="warn-col-player" />
+                <col className="warn-col-staff" />
+                <col className="warn-col-reason" />
+                <col className="warn-col-date" />
+                <col className="warn-col-until" />
+              </colgroup>
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <tr key={headerGroup.id}>
