@@ -77,7 +77,7 @@ const config = {
           { to: "/feeds/news", label: "Новости", position: "left" },
           { to: "/feeds/gallery", label: "#галерея", position: "left" },
           { type: "docSidebar", sidebarId: "tutorialSidebar", position: "left", label: "Wiki" },
-          { href: "https://warn.luminor.games", label: "Стена Позора", position: "left" },
+          { to: "/warn", label: "Стена Позора", position: "left" },
 
           { href: "https://social.luminor.games", label: "Social", position: "right" },
           { href: "https://discord.gg/t9wbfUr8xJ", label: "Discord", position: "right" },
