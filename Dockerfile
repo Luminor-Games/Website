@@ -24,6 +24,4 @@ ENV API_PORT=3101
 ENV FEEDS_TTL_MS=120000
 ENV FEEDS_LIMIT=20
 
-ENV DATABASE_URL="mysql://u6299_112siBUCpf:!yEF7pX@O3y00P@wzX3OYY.@@s2.bisquit.host:3306/s6299_LiteBans"
-
 CMD ["supervisord", "-c", "/app/supervisord.conf"]
