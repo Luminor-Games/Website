@@ -262,7 +262,18 @@ export default function WarnPage() {
                           {TYPE_LABELS[item.type] ?? item.type}
                         </span>
                       </td>
-                      <td>{item.player || "—"}</td>
+                      <td>
+                        <span className="warn-player">
+                          <img
+                            src={`https://avatar.luminor.games/face/name/${encodeURIComponent(
+                              item.player || "lakiviko"
+                            )}?upscale=4`}
+                            alt=""
+                            loading="lazy"
+                          />
+                          <span>{item.player || "—"}</span>
+                        </span>
+                      </td>
                       <td>{item.staff || "—"}</td>
                       <td>{item.reason || "—"}</td>
                       <td>{formatDate(item.time)}</td>
