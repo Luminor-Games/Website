@@ -21,6 +21,7 @@
     "clsx": "^2.0.0",
     "embla-carousel-react": "^8.6.0",
     "fastify": "^5.6.2",
+    "mysql2": "^3.11.0",
     "imagesloaded": "^5.0.0",
     "masonry-layout": "^4.2.2",
     "prism-react-renderer": "^2.3.0",
